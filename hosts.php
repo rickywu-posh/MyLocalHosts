@@ -67,7 +67,6 @@ if(!empty($_POST))
 <style type="text/css">
 .table:not(.just_view) td{
 	text-align: center;
-	border:1px solid red;
 }
 .table th {
   color: #fff;
@@ -137,6 +136,14 @@ if($toEdit):
 <span id="add_one_row" class="btn">Add One Row</span>
 <input type="submit" value="Submit" class="btn btn-primary pull-right" />
 </td></tr>
+<?php
+else:
+?>
+<tr>
+<td colspan="3" style="text-align:right;">
+<a href="?edit">Edit</a>
+</td>
+</tr>
 <?php
 endif;
 ?>
