@@ -26,7 +26,8 @@ if(!empty($_POST))
 	
 	for($i=0;$i<$count;$i++)
 	{
-		$lines[$line_no[$i]]=(empty($_POST['active::'.$line_no[$i]])?'#':'').$_POST['ip::'.$line_no[$i]].'   '.$_POST['domain::'.$line_no[$i]];
+		$lines[$line_no[$i]]=(empty($_POST['active::'.$line_no[$i]])?'#':'')
+			.$_POST['ip::'.$line_no[$i]].'   '.$_POST['domain::'.$line_no[$i]];
 	}
 	
 	$new_lines=[];
@@ -35,7 +36,8 @@ if(!empty($_POST))
 	for($i=0;$i<$new_count;$i++)
 	{
 		$new_no=$new_line_no[$i];
-		$lines[]=(empty($_POST['active::new'.$new_no])?'#':'').$_POST['ip::new'.$new_no].'   '.$_POST['domain::new'.$new_no];
+		$lines[]=(empty($_POST['active::new'.$new_no])?'#':'')
+			.$_POST['ip::new'.$new_no].'   '.$_POST['domain::new'.$new_no];
 	}
 	$new_contents=implode("\n",$lines);
 	copy($hosts_file,$hosts_file.'_bakAt'.date('YmdHis'));
@@ -83,16 +85,18 @@ if(!empty($_POST))
 <?php
 if(empty($_POST) && isset($_SESSION['EDIT_HOSTS_SUCCESS']) && !$_SESSION['EDIT_HOSTS_SUCCESS'])
 {
-	echo '<div class="alert alert-danger alert-dismissable">Failed to Save Hosts file!<button type="button" class="close" data-dismiss="alert" 
+	echo '<div class="alert alert-danger alert-dismissable">
+	Failed to Save Hosts file!<button type="button" class="close" data-dismiss="alert" 
       aria-hidden="true">
       &times;
-   </button></div>';
+    </button></div>';
 	unset($_SESSION['EDIT_HOSTS_SUCCESS']);
 }
 
 ?>
 <form method="post" class="form-hosts" role="form">
-<table class="table table-striped table-bordered table-hover table-condensed <?=($toEdit?'':'just_view')?>" style="width:auto;margin:20px auto" id="hosts_table">
+<table class="table table-striped table-bordered table-hover table-condensed 
+<?=($toEdit?'':'just_view')?>" style="width:auto;margin:20px auto" id="hosts_table">
 <thead>
 <tr>
 <th>IP</th>
@@ -110,9 +114,12 @@ foreach($hosts as $host)
 		echo <<<TR
 		<tr>
 		<input type="hidden" name="line_no[]" value="{$host['line_no']}" />
-		<td><input class="form-control" type="text" name="ip::{$host['line_no']}" value="{$host['ip']}" /></td>
-		<td><input class="form-control" type="text" name="domain::{$host['line_no']}" value="{$host['domain']}" /></td>
-		<td><input class="form-control" type="checkbox" name="active::{$host['line_no']}" $checked /></td>
+		<td><input class="form-control" type="text" 
+			name="ip::{$host['line_no']}" value="{$host['ip']}" /></td>
+		<td><input class="form-control" type="text" 
+			name="domain::{$host['line_no']}" value="{$host['domain']}" /></td>
+		<td><input class="form-control" type="checkbox" 
+			name="active::{$host['line_no']}" $checked /></td>
 		</tr>
 TR;
 	}else{
@@ -158,9 +165,12 @@ $(function(){
 	$("#add_one_row").click(function(){
 		$row_html='<tr> \
 		<input type="hidden" name="line_no::new[]" value="'+new_row+'" /> \
-		<td><input class="form-control" type="text" name="ip::new'+new_row+'" value=""></td> \
-		<td><input class="form-control" type="text" name="domain::new'+new_row+'" value=""></td> \
-		<td><input class="form-control" type="checkbox" name="active::new'+new_row+'" checked=""></td> \
+		<td><input class="form-control" type="text" \
+		name="ip::new'+new_row+'" value=""></td> \
+		<td><input class="form-control" type="text" \
+		name="domain::new'+new_row+'" value=""></td> \
+		<td><input class="form-control" type="checkbox" \
+		name="active::new'+new_row+'" checked=""></td> \
 		</tr>';
 		$("#hosts_table tr:last").before($row_html);
 		new_row++;
