@@ -26,6 +26,11 @@ if(!empty($_POST))
 	
 	for($i=0;$i<$count;$i++)
 	{
+		if(!empty($_POST['delete::'.$line_no[$i]]))
+		{
+			$lines[$line_no[$i]]='deleted';
+			continue;
+		}
 		$lines[$line_no[$i]]=(empty($_POST['active::'.$line_no[$i]])?'#':'')
 			.$_POST['ip::'.$line_no[$i]].'   '.$_POST['domain::'.$line_no[$i]];
 	}
@@ -36,11 +41,17 @@ if(!empty($_POST))
 	for($i=0;$i<$new_count;$i++)
 	{
 		$new_no=$new_line_no[$i];
+		if(!$_POST['ip::new'.$new_no] || !$_POST['domain::new'.$new_no])
+		{
+			continue;
+		}
 		$lines[]=(empty($_POST['active::new'.$new_no])?'#':'')
 			.$_POST['ip::new'.$new_no].'   '.$_POST['domain::new'.$new_no];
 	}
-	$new_contents=implode("\n",$lines);
-	copy($hosts_file,$hosts_file.'_bakAt'.date('YmdHis'));
+	$new_contents=implode("\n",array_filter($lines,function($row){
+		return $row!=='deleted';
+	}));
+	!empty($_POST['backup']) && copy($hosts_file,$hosts_file.'_bakAt'.date('YmdHis'));
 	if(!file_put_contents($hosts_file,$new_contents))
 	{
 		$_SESSION['EDIT_HOSTS_SUCCESS']=false;
@@ -67,6 +78,10 @@ if(!empty($_POST))
 <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 
 <style type="text/css">
+.form-control[type=checkbox]{
+	box-shadow:none!important;
+	-webkit-box-shadow:none!important;
+}
 .table:not(.just_view) td{
 	text-align: center;
 }
@@ -79,7 +94,12 @@ if(!empty($_POST))
   vertical-align: top;
   text-align: left;
 }
-
+.table td{
+	vertical-align: middle!important;
+}
+#add_one_row:active,#add_one_row:focus{
+	outline:none!important;
+}
 </style>
 </head>
 <?php
@@ -94,16 +114,24 @@ if(empty($_POST) && isset($_SESSION['EDIT_HOSTS_SUCCESS']) && !$_SESSION['EDIT_H
 }
 
 ?>
-<form method="post" class="form-hosts" role="form">
+<form method="post" class="form-hosts" role="form" action="">
 <table class="table table-striped table-bordered table-hover table-condensed 
 <?=($toEdit?'':'just_view')?>" style="width:auto;margin:20px auto" id="hosts_table">
 <thead>
 <tr>
 <th>IP</th>
-<th>域名</th>
-<th>激活</th>
+<th>Domain</th>
+<th>Active?</th>
+<?php
+if($toEdit):
+?>
+<th>Delete?</th>
+<?php 
+endif;
+?>
 </tr>
 </thead>
+<tbody>
 <?php
 foreach($hosts as $host)
 {
@@ -120,6 +148,8 @@ foreach($hosts as $host)
 			name="domain::{$host['line_no']}" value="{$host['domain']}" /></td>
 		<td><input class="form-control" type="checkbox" 
 			name="active::{$host['line_no']}" $checked /></td>
+		<td><input class="form-control" type="checkbox" 
+			name="delete::{$host['line_no']}" /></td>
 		</tr>
 TR;
 	}else{
@@ -136,12 +166,18 @@ TR;
 	
 }
 ?>
+</tbody>
+<tfoot>
 <?php
 if($toEdit):
 ?>
-<tr><td colspan="3" style="text-align:left;">
-<span id="add_one_row" class="btn">Add One Row</span>
+<tr><td colspan="4" style="text-align:left;">
+<button id="add_one_row" class="btn btn-xs">Add One Row</button>
+
 <input type="submit" value="Submit" class="btn btn-primary pull-right" />
+<label class="checkbox-inline pull-right" style="margin-top:8px;margin-right:5px;">
+<input type="checkbox" name="backup"> Backup
+</label>
 </td></tr>
 <?php
 else:
@@ -154,6 +190,7 @@ else:
 <?php
 endif;
 ?>
+</tfoot>
 </table>
 
 </form>
@@ -171,9 +208,16 @@ $(function(){
 		name="domain::new'+new_row+'" value=""></td> \
 		<td><input class="form-control" type="checkbox" \
 		name="active::new'+new_row+'" checked=""></td> \
+		<td>\
+		<span class="glyphicon glyphicon-remove" id="delete::new'+new_row+'" style="cursor:pointer;"></span>  \
+        </td> \
 		</tr>';
-		$("#hosts_table tr:last").before($row_html);
+		$("#hosts_table tbody").append($row_html);
 		new_row++;
+		return false;
+	});
+	$(document).on('click','[id^="delete::new"]',function(){
+		$(this).closest('tr').remove();
 	});
 });
 </script>
